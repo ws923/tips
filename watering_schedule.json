@@ -1,0 +1,423 @@
+{
+  "name": "Watering Schedule",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                5
+              ],
+              "triggerAtHour": 16
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.main }}",
+              "operation": "larger",
+              "value2": 1
+            }
+          ]
+        }
+      },
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $env.LATITUDE }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $env.LONGITUDE }}"
+            },
+            {
+              "name": "hourly",
+              "value": "precipitation"
+            },
+            {
+              "name": "precipitation_unit",
+              "value": "inch"
+            },
+            {
+              "name": "timezone",
+              "value": "America/New_York"
+            },
+            {
+              "name": "forecast_days",
+              "value": "3"
+            },
+            {
+              "name": "past_days",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "Today + Next 3 Days",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $env.LATITUDE }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $env.LONGITUDE }}"
+            },
+            {
+              "name": "hourly",
+              "value": "precipitation"
+            },
+            {
+              "name": "precipitation_unit",
+              "value": "inch"
+            },
+            {
+              "name": "timezone",
+              "value": "America/New_York"
+            },
+            {
+              "name": "past_days",
+              "value": "7"
+            },
+            {
+              "name": "forecast_days",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "Get Rain Past 7 Days",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $env.LATITUDE }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $env.LONGITUDE }}"
+            },
+            {
+              "name": "hourly",
+              "value": "precipitation"
+            },
+            {
+              "name": "precipitation_unit",
+              "value": "inch"
+            },
+            {
+              "name": "timezone",
+              "value": "America/New_York"
+            },
+            {
+              "name": "past_days",
+              "value": "7"
+            },
+            {
+              "name": "forecast_days",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "name": "Sum Last 7 + Next 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "operation": "concatenateItems",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "hourly.precipitation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Put Values into List 1",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "concatenateItems",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "hourly.precipitation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Put Values into List 2",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "concatenateItems",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "hourly.precipitation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Put Values into List 3",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0]; // Access the first item from items\n\nlet total = 0;\n\nfor (const precipitation of data.json.precipitation[0]) {\n  // Loop through each element in the precipitation array\n  total += precipitation;  // Add each value to the total\n}\n\nreturn {  // Return a single object (preferred in n8n)\n  main: total, // Set the sum as the value for the key \"main\"\n};"
+      },
+      "name": "Sum and Set Value 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0]; // Access the first item from items\n\nlet total = 0;\n\nfor (const precipitation of data.json.precipitation[0]) {\n  // Loop through each element in the precipitation array\n  total += precipitation;  // Add each value to the total\n}\n\nreturn {  // Return a single object (preferred in n8n)\n  main: total, // Set the sum as the value for the key \"main\"\n};"
+      },
+      "name": "Sum and Set Value 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0]; // Access the first item from items\n\nlet total = 0;\n\nfor (const precipitation of data.json.precipitation[0]) {\n  // Loop through each element in the precipitation array\n  total += precipitation;  // Add each value to the total\n}\n\nreturn {  // Return a single object (preferred in n8n)\n  main: total, // Set the sum as the value for the key \"main\"\n};"
+      },
+      "name": "Sum and Set Value 3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=--\n**{{ $json.main.round(2) }} inches** over a period of about 1 week. YOU'RE GOOD!\n--\n* {{ $('Sum and Set Value 1').item.json.main.round(2) }} inches in the last week\n* {{ $('Sum and Set Value 2').item.json.main.round(2) }} in the next 3 days",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "name": "Discord (>1\")",
+      "webhookId": "7eb47783-7e1b-4da5-a3ee-8eaa7828285e",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "7aanfLmox25LNuZ9",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=--\n**{{ $json.main.round(2) }} inches** over a period of about 1 week. TIME TO WATER!\n--\n* {{ $('Sum and Set Value 1').item.json.main.round(2) }} inches in the last week\n* {{ $('Sum and Set Value 2').item.json.main.round(2) }} in the next 3 days",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "name": "Discord (<1\")",
+      "webhookId": "7eb47783-7e1b-4da5-a3ee-8eaa7828285e",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "7aanfLmox25LNuZ9",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Rain Past 7 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Discord (>1\")",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord (<1\")",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Today + Next 3 Days": {
+      "main": [
+        [
+          {
+            "node": "Put Values into List 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Rain Past 7 Days": {
+      "main": [
+        [
+          {
+            "node": "Put Values into List 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum Last 7 + Next 3": {
+      "main": [
+        [
+          {
+            "node": "Put Values into List 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Put Values into List 1": {
+      "main": [
+        [
+          {
+            "node": "Sum and Set Value 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Put Values into List 2": {
+      "main": [
+        [
+          {
+            "node": "Sum and Set Value 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Put Values into List 3": {
+      "main": [
+        [
+          {
+            "node": "Sum and Set Value 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum and Set Value 1": {
+      "main": [
+        [
+          {
+            "node": "Today + Next 3 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum and Set Value 2": {
+      "main": [
+        [
+          {
+            "node": "Sum Last 7 + Next 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum and Set Value 3": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
