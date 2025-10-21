@@ -17,7 +17,12 @@
       },
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1
+      "typeVersion": 1.1,
+      "id": "6e99dfce-2162-4a50-9d64-6eb003275cf1",
+      "position": [
+        -16,
+        768
+      ]
     },
     {
       "parameters": {
@@ -33,7 +38,12 @@
       },
       "name": "IF",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1
+      "typeVersion": 1,
+      "id": "3776e7a4-a3d8-417e-a456-587fdf6d44be",
+      "position": [
+        848,
+        960
+      ]
     },
     {
       "parameters": {
@@ -81,7 +91,12 @@
       },
       "name": "Today + Next 3 Days",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1
+      "typeVersion": 4.1,
+      "id": "06e7f684-89c2-4a70-9a5c-02b1365bb7ab",
+      "position": [
+        176,
+        960
+      ]
     },
     {
       "parameters": {
@@ -129,7 +144,12 @@
       },
       "name": "Get Rain Past 7 Days",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1
+      "typeVersion": 4.1,
+      "id": "1f733d47-7184-432c-b98d-9529fb306e99",
+      "position": [
+        176,
+        768
+      ]
     },
     {
       "parameters": {
@@ -177,7 +197,12 @@
       },
       "name": "Sum Last 7 + Next 3",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1
+      "typeVersion": 4.1,
+      "id": "5919b8fc-d0ac-424e-a9e9-0fef9312a284",
+      "position": [
+        176,
+        1152
+      ]
     },
     {
       "parameters": {
@@ -193,7 +218,12 @@
       },
       "name": "Put Values into List 1",
       "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "id": "eac9433f-326f-49b7-91d3-faf96e85511d",
+      "position": [
+        368,
+        768
+      ]
     },
     {
       "parameters": {
@@ -209,7 +239,12 @@
       },
       "name": "Put Values into List 2",
       "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "id": "5795e69c-3b98-46bc-baf1-e8eb2182bce0",
+      "position": [
+        368,
+        960
+      ]
     },
     {
       "parameters": {
@@ -225,7 +260,12 @@
       },
       "name": "Put Values into List 3",
       "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "id": "2c051880-a129-4d42-8ab0-6d7cef3de636",
+      "position": [
+        368,
+        1152
+      ]
     },
     {
       "parameters": {
@@ -233,7 +273,12 @@
       },
       "name": "Sum and Set Value 1",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2
+      "typeVersion": 2,
+      "id": "999f1d53-4507-48e3-9693-aedf6d19c7c4",
+      "position": [
+        560,
+        768
+      ]
     },
     {
       "parameters": {
@@ -241,7 +286,12 @@
       },
       "name": "Sum and Set Value 2",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2
+      "typeVersion": 2,
+      "id": "c33d384c-cb50-4b9f-b35e-f182ce510e36",
+      "position": [
+        560,
+        960
+      ]
     },
     {
       "parameters": {
@@ -249,43 +299,47 @@
       },
       "name": "Sum and Set Value 3",
       "type": "n8n-nodes-base.code",
-      "typeVersion": 2
+      "typeVersion": 2,
+      "id": "67864fd6-0fa4-43a2-8c65-13cd0ec9fd17",
+      "position": [
+        560,
+        1152
+      ]
     },
     {
       "parameters": {
         "authentication": "webhook",
         "content": "=--\n**{{ $json.main.round(2) }} inches** over a period of about 1 week. YOU'RE GOOD!\n--\n* {{ $('Sum and Set Value 1').item.json.main.round(2) }} inches in the last week\n* {{ $('Sum and Set Value 2').item.json.main.round(2) }} in the next 3 days",
-        "options": {}
+        "options": {},
+        "webhookUri": "={{ $env.DISCORD_WEBHOOK_URL }}"
       },
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "name": "Discord (>1\")",
-      "webhookId": "7eb47783-7e1b-4da5-a3ee-8eaa7828285e",
-      "credentials": {
-        "discordWebhookApi": {
-          "id": "7aanfLmox25LNuZ9",
-          "name": "Discord Webhook account"
-        }
-      }
+      "id": "0e0da0b6-6097-4402-b51e-2a8f06f38df3",
+      "position": [
+        1040,
+        880
+      ]
     },
     {
       "parameters": {
         "authentication": "webhook",
         "content": "=--\n**{{ $json.main.round(2) }} inches** over a period of about 1 week. TIME TO WATER!\n--\n* {{ $('Sum and Set Value 1').item.json.main.round(2) }} inches in the last week\n* {{ $('Sum and Set Value 2').item.json.main.round(2) }} in the next 3 days",
-        "options": {}
+        "options": {},
+        "webhookUri": "={{ $env.DISCORD_WEBHOOK_URL }}"
       },
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "name": "Discord (<1\")",
-      "webhookId": "7eb47783-7e1b-4da5-a3ee-8eaa7828285e",
-      "credentials": {
-        "discordWebhookApi": {
-          "id": "7aanfLmox25LNuZ9",
-          "name": "Discord Webhook account"
-        }
-      }
+      "id": "51017b7f-7763-4285-a6e9-55d9b9368ac7",
+      "position": [
+        1040,
+        1040
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -419,5 +473,6 @@
   "active": false,
   "settings": {
     "executionOrder": "v1"
-  }
+  },
+  "tags": []
 }
